@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, AlertCircle, CheckCircle2, FileText, Share2, Activity } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { useBlogPost, useBlogValidation } from '../lib/ai/hooks';
 import { BlogService } from '../lib/ai/blog';
 import type { BlogPost } from '../lib/ai/types';
@@ -314,108 +315,162 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ slug, onSave }) => {
 
       {/* SEO Tab */}
       {activeTab === 'seo' && (
-        <div className="space-y-4">
-          {validationResult && (
-            <div
-              className={`p-4 border rounded-lg ${
-                validationResult.valid
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-red-50 border-red-200'
-              }`}
-            >
-              <div className="flex items-start gap-2">
-                {validationResult.valid ? (
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                )}
-                <div>
-                  {validationResult.issues.length > 0 && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              {validationResult && (
+                <div
+                  className={`p-4 border rounded-lg ${
+                    validationResult.valid
+                      ? 'bg-green-50 border-green-200'
+                      : 'bg-red-50 border-red-200'
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    {validationResult.valid ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    )}
                     <div>
-                      <p className="font-semibold text-red-900 mb-2">Issues:</p>
-                      <ul className="space-y-1">
-                        {validationResult.issues.map((issue, i) => (
-                          <li key={i} className="text-sm text-red-800">
-                            • {issue}
-                          </li>
-                        ))}
-                      </ul>
+                      {validationResult.issues.length > 0 && (
+                        <div>
+                          <p className="font-semibold text-red-900 mb-2">Issues:</p>
+                          <ul className="space-y-1">
+                            {validationResult.issues.map((issue, i) => (
+                              <li key={i} className="text-sm text-red-800">
+                                • {issue}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {validationResult.warnings.length > 0 && (
+                        <div className="mt-2">
+                          <p className="font-semibold text-yellow-900 mb-2">Warnings:</p>
+                          <ul className="space-y-1">
+                            {validationResult.warnings.map((warning, i) => (
+                              <li key={i} className="text-sm text-yellow-800">
+                                • {warning}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {validationResult.warnings.length > 0 && (
-                    <div className="mt-2">
-                      <p className="font-semibold text-yellow-900 mb-2">Warnings:</p>
-                      <ul className="space-y-1">
-                        {validationResult.warnings.map((warning, i) => (
-                          <li key={i} className="text-sm text-yellow-800">
-                            • {warning}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    SEO Title (30-60 chars)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={formData.seoTitle}
+                      onChange={(e) => handleFieldChange('seoTitle', e.target.value)}
+                      placeholder="Optimized page title"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="absolute right-3 top-2.5 text-xs text-slate-500">
+                      {formData.seoTitle.length}/60
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    SEO Description (120-160 chars)
+                  </label>
+                  <div className="relative">
+                    <textarea
+                      value={formData.seoDescription}
+                      onChange={(e) => handleFieldChange('seoDescription', e.target.value)}
+                      placeholder="Meta description for search engines"
+                      rows={2}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="absolute right-3 bottom-2.5 text-xs text-slate-500">
+                      {formData.seoDescription.length}/160
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Focus Keywords
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.seoKeywords}
+                    onChange={(e) => handleFieldChange('seoKeywords', e.target.value)}
+                    placeholder="keyword1, keyword2, keyword3"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
               </div>
-            </div>
-          )}
 
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                SEO Title (30-60 chars)
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={formData.seoTitle}
-                  onChange={(e) => handleFieldChange('seoTitle', e.target.value)}
-                  placeholder="Optimized page title"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="absolute right-3 top-2.5 text-xs text-slate-500">
-                  {formData.seoTitle.length}/60
-                </span>
-              </div>
+              <button
+                onClick={handleValidate}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Validate SEO via AI
+              </button>
             </div>
+            
+            {/* Right side: Metrics Charts */}
+            <div className="space-y-6">
+              {analysis ? (
+                <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 shadow-sm h-full">
+                  <h3 className="font-semibold text-slate-800 mb-6 text-center text-lg">Real-time Content Performance</h3>
+                  
+                  <div className="h-64 mb-8">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart cx="50%" cy="50%" outerRadius="70%" data={[
+                        { subject: 'Readability', score: analysis.fleschKincaid, fullMark: 100 },
+                        { subject: 'Word Count', score: Math.min((analysis.wordCount / 1000) * 100, 100), fullMark: 100 },
+                        { subject: 'KW Density', score: Math.min((analysis.keywordDensity / 2.5) * 100, 100), fullMark: 100 },
+                      ]}>
+                        <PolarGrid stroke="#cbd5e1" />
+                        <PolarAngleAxis dataKey="subject" textAnchor="middle" tick={{ fontSize: 13, fill: '#334155', fontWeight: 500 }} />
+                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#94a3b8' }} />
+                        <Radar name="Score" dataKey="score" stroke="#2563eb" strokeWidth={2} fill="#3b82f6" fillOpacity={0.4} />
+                        <Tooltip 
+                          contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                SEO Description (120-160 chars)
-              </label>
-              <div className="relative">
-                <textarea
-                  value={formData.seoDescription}
-                  onChange={(e) => handleFieldChange('seoDescription', e.target.value)}
-                  placeholder="Meta description for search engines"
-                  rows={2}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="absolute right-3 bottom-2.5 text-xs text-slate-500">
-                  {formData.seoDescription.length}/160
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Focus Keywords
-              </label>
-              <input
-                type="text"
-                value={formData.seoKeywords}
-                onChange={(e) => handleFieldChange('seoKeywords', e.target.value)}
-                placeholder="keyword1, keyword2, keyword3"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                  <h4 className="text-sm font-bold text-slate-700 mb-4 text-center border-t pt-4">Link Usage Breakdown</h4>
+                  <div className="h-40">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={[
+                        { name: 'Internal Links', count: analysis.internalLinks },
+                        { name: 'External Links', count: analysis.externalLinks }
+                      ]} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                        <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#475569', fontWeight: 500 }} axisLine={false} tickLine={false} />
+                        <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: '#475569' }} axisLine={false} tickLine={false} />
+                        <Tooltip 
+                           cursor={{ fill: '#e2e8f0' }}
+                           contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                        />
+                        <Bar dataKey="count" fill="#0ea5e9" radius={[4, 4, 0, 0]} barSize={40} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 shadow-sm h-full flex flex-col items-center justify-center text-slate-500">
+                  <Activity className="w-12 h-12 mb-4 opacity-50" />
+                  <p className="text-center">Add content and keywords<br/>to see performance metrics</p>
+                </div>
+              )}
             </div>
           </div>
-
-          <button
-            onClick={handleValidate}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            Validate SEO via AI
-          </button>
         </div>
       )}
 
