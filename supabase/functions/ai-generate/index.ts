@@ -41,35 +41,40 @@ Deno.serve(async (req: Request) => {
     let tokensUsed = 0;
 
     switch (body.provider.toLowerCase()) {
-      case "openai":
+      case "openai": {
         const openaiResult = await callOpenAI(apiKey, body);
         aiResponse = openaiResult.content;
         tokensUsed = openaiResult.tokens;
         break;
+      }
 
-      case "gemini":
+      case "gemini": {
         const geminiResult = await callGemini(apiKey, body);
         aiResponse = geminiResult.content;
         tokensUsed = geminiResult.tokens;
         break;
+      }
 
-      case "claude":
+      case "claude": {
         const claudeResult = await callClaude(apiKey, body);
         aiResponse = claudeResult.content;
         tokensUsed = claudeResult.tokens;
         break;
+      }
 
-      case "perplexity":
+      case "perplexity": {
         const perplexityResult = await callPerplexity(apiKey, body);
         aiResponse = perplexityResult.content;
         tokensUsed = perplexityResult.tokens;
         break;
+      }
 
-      case "deepseek":
+      case "deepseek": {
         const deepseekResult = await callDeepseek(apiKey, body);
         aiResponse = deepseekResult.content;
         tokensUsed = deepseekResult.tokens;
         break;
+      }
 
       default:
         return new Response(

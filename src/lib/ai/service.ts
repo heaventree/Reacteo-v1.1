@@ -216,7 +216,7 @@ export class AIService {
   /**
    * Suggest schema for page
    */
-  async suggestSchema(content: PageContent, pageType: string = 'WebPage'): Promise<Record<string, any>> {
+  async suggestSchema(content: PageContent, pageType: string = 'WebPage'): Promise<Record<string, unknown>> {
     const prompt = `
       Generate a complete JSON-LD schema for a ${pageType} with this content:
       Title: "${content.title}"

@@ -59,7 +59,7 @@ serve(async (req) => {
       };
 
       // 4. Update the page if fields are empty
-      const updates: any = {};
+      const updates: Record<string, unknown> = {};
       
       // Title
       if (!page.title) {
@@ -94,9 +94,10 @@ serve(async (req) => {
       { headers: { 'Content-Type': 'application/json' }, status: 200 }
     );
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    const message = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

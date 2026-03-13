@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AIService } from './service';
 import { BlogService } from './blog';
 import { PageCrawler } from './crawler';
@@ -72,7 +72,7 @@ export function useAIAudit() {
 /**
  * useBlogPost - Manage single blog post
  */
-export function useBlogPost(_initialSlug?: string) {
+export function useBlogPost(initialSlug?: string) {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,6 +141,12 @@ export function useBlogPost(_initialSlug?: string) {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (initialSlug) {
+      loadPost(initialSlug).catch(console.error);
+    }
+  }, [initialSlug, loadPost]);
 
   return {
     post,

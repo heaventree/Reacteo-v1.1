@@ -12,6 +12,20 @@ export interface SitemapPageRecord {
   priority?: number;
 }
 
+export type SitemapFetcher = () => Promise<SitemapPageRecord[]>;
+
+/**
+ * Generates an XML sitemap dynamically using an async fetcher function.
+ * Ideal for fetching thousands of URLs from a database at build time.
+ */
+export async function buildSitemapFromFetcher(
+  fetcher: SitemapFetcher,
+  hostname: string
+): Promise<string> {
+  const pages = await fetcher();
+  return generateDynamicSitemap(pages, hostname);
+}
+
 /**
  * Generates an XML sitemap from a list of URLs.
  * Example Next.js Usage:

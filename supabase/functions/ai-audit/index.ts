@@ -12,12 +12,21 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
 );
 
+interface AuditSuggestion {
+  type?: string;
+  priority?: string;
+  title?: string;
+  description?: string;
+  action?: string;
+  estimatedImpact?: string;
+}
+
 interface AuditRequest {
   pageId: string;
   aiModelId: string;
   auditType: string;
   issues: unknown[];
-  suggestions: unknown[];
+  suggestions: AuditSuggestion[];
   score: number;
   h1Issues: unknown[];
   h2HierarchyIssues: unknown[];
@@ -95,7 +104,7 @@ Deno.serve(async (req: Request) => {
 
       // Create suggestions
       const auditId = data[0].id;
-      const suggestionInserts = body.suggestions.map((suggestion: any) => ({
+      const suggestionInserts = body.suggestions.map((suggestion: AuditSuggestion) => ({
         page_id: body.pageId,
         audit_id: auditId,
         suggestion_type: suggestion.type,

@@ -84,7 +84,7 @@ async function runAudit() {
     let htmlCount = 0;
     try {
       const files = fs.readdirSync(distDir, { recursive: true });
-      htmlCount = files.filter((f: any) => typeof f === 'string' && f.endsWith('.html')).length;
+      htmlCount = files.filter((f: string | Buffer) => typeof f === 'string' && f.endsWith('.html')).length;
     } catch {
       htmlCount = 0;
     }
