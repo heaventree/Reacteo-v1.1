@@ -1,7 +1,10 @@
 import { SEO } from './lib/seo';
 import { buildWebSiteSchema } from './lib/seo';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { AuthGuard } from './components/AuthGuard';
 
-function App() {
+function HomePage() {
   return (
     <>
       <SEO
@@ -22,10 +25,15 @@ function App() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
         <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm">
           <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-slate-900">My Awesome App</h1>
-            <a href="#" className="text-slate-600 hover:text-slate-900 transition">
-              Documentation
-            </a>
+            <Link to="/" className="text-2xl font-bold text-slate-900">My Awesome App</Link>
+            <div className="flex gap-4">
+              <Link to="/admin" className="text-slate-600 hover:text-slate-900 transition">
+                Admin Dashboard
+              </Link>
+              <a href="#" className="text-slate-600 hover:text-slate-900 transition">
+                Documentation
+              </a>
+            </div>
           </nav>
         </header>
 
@@ -112,6 +120,24 @@ function App() {
         </footer>
       </div>
     </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/admin"
+          element={
+            <AuthGuard requiredRole="admin">
+              <AdminDashboard />
+            </AuthGuard>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
