@@ -30,6 +30,7 @@ export const SEO: React.FC<SEOProps> = ({
   twitter,
   jsonLd,
   nofollow = false,
+  noindex = false,
   templateContext,
 }) => {
   const { config, isDevelopment } = useSEOContext();
@@ -60,11 +61,12 @@ export const SEO: React.FC<SEOProps> = ({
     return renderTemplate(description || config.defaultDescription || '', baseContext);
   }, [description, config.defaultDescription, baseContext]);
 
-  // Determine canonical URL
+  // Determine canonical URL - strip query params and hash for SEO best practices
   const finalCanonical = useMemo(() => {
     if (canonical) return canonical;
     if (typeof window !== 'undefined') {
-      return window.location.href;
+      // Use origin + pathname only, exclude search params and hash
+      return `${window.location.origin}${window.location.pathname}`;
     }
     return config.hostname;
   }, [canonical, config.hostname]);
@@ -165,13 +167,17 @@ export const SEO: React.FC<SEOProps> = ({
 
       {/* JSON-LD Structured Data */}
       {jsonLdArray &&
-        jsonLdArray.map((schema, index) => (
-          <script
-            key={`json-ld-${index}`}
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-          />
-        ))}
+        jsonLdArray.map((schema, index) => {
+          // XSS Protection: Escape < characters to prevent script injection
+          const safeJsonLd = JSON.stringify(schema).replace(/</g, '\\u003c');
+          return (
+            <script
+              key={`json-ld-${index}`}
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: safeJsonLd }}
+            />
+          );
+        })}
     </Helmet>
   );
 };
