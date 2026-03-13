@@ -253,7 +253,7 @@ export const AdminDashboard: React.FC = () => {
                         <option value="all">All Scores</option>
                         <option value="high">Good (80+)</option>
                         <option value="medium">Fair (60-79)</option>
-                        <option value="low">Poor (< 60)</option>
+                        <option value="low">Poor (&lt; 60)</option>
                       </select>
                     </div>
 
