@@ -72,18 +72,18 @@ export function renderTemplate(template: string | undefined, context: TemplateCo
 /**
  * Processes an entire object of SEO templates (e.g. title, description), rendering them string by string.
  */
-export function renderSeoTemplates<T extends Record<string, any>>(templates: T, context: TemplateContext): T {
-  const rendered: any = { ...templates };
+export function renderSeoTemplates<T extends Record<string, unknown>>(templates: T, context: TemplateContext): T {
+  const rendered: Record<string, unknown> = { ...templates };
   
   for (const key in rendered) {
     if (Object.prototype.hasOwnProperty.call(rendered, key)) {
       if (key === '__proto__' || key === 'constructor') continue;
 
       if (typeof rendered[key] === 'string') {
-        rendered[key] = renderTemplate(rendered[key], context);
+        rendered[key] = renderTemplate(rendered[key] as string, context);
       } else if (typeof rendered[key] === 'object' && rendered[key] !== null) {
         if (!Array.isArray(rendered[key])) {
-           rendered[key] = renderSeoTemplates(rendered[key], context);
+           rendered[key] = renderSeoTemplates(rendered[key] as Record<string, unknown>, context);
         }
       }
     }

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Save, AlertCircle, CheckCircle2, FileText } from 'lucide-react';
+import { Save, AlertCircle, CheckCircle2, FileText, Share2, Activity } from 'lucide-react';
 import { useBlogPost, useBlogValidation } from '../lib/ai/hooks';
 import { BlogService } from '../lib/ai/blog';
 import type { BlogPost } from '../lib/ai/types';
+import { SocialPreview } from '../lib/seo/admin/SocialPreview';
+import { analyzeContent, type SEOAnalysisResult } from '../lib/seo/utils/analyzer';
 
 interface BlogEditorProps {
   slug?: string;
@@ -28,36 +30,47 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ slug, onSave }) => {
     readingTime: 0,
   });
   const [tagInput, setTagInput] = useState('');
-  const [activeTab, setActiveTab] = useState<'editor' | 'seo' | 'preview'>('editor');
+  const [activeTab, setActiveTab] = useState<'editor' | 'seo' | 'social' | 'preview'>('editor');
+  const [analysis, setAnalysis] = useState<SEOAnalysisResult | null>(null);
 
   useEffect(() => {
     if (post) {
       setFormData(post);
+      if (post.content) {
+        setAnalysis(analyzeContent(post.content, post.seoKeywords || '', window.location.hostname));
+      }
     }
   }, [post]);
 
-  const handleFieldChange = (field: keyof BlogPost, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleFieldChange = (field: keyof BlogPost, value: unknown) => {
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+      
+      // Update analysis if content or keywords change
+      if (field === 'content' || field === 'seoKeywords') {
+         const kw = field === 'seoKeywords' ? value as string : prev.seoKeywords;
+         const content = field === 'content' ? value as string : prev.content;
+         setAnalysis(analyzeContent(content || '', kw || '', window.location.hostname));
+      }
+      return updated;
+    });
 
     // Auto-update slugs and counts
     if (field === 'title' && !slug) {
       setFormData((prev) => ({
         ...prev,
-        slug: BlogService.slugify(value),
+        slug: BlogService.slugify(value as string),
       }));
     }
 
     if (field === 'content') {
-      const wordCount = BlogService.calculateWordCount(value);
-      const readingTime = BlogService.calculateReadingTime(value);
+      const wordCount = BlogService.calculateWordCount(value as string);
+      const readingTime = BlogService.calculateReadingTime(value as string);
       setFormData((prev) => ({
         ...prev,
         wordCount,
         readingTime,
-        excerpt: prev.excerpt || BlogService.generateExcerpt(value),
+        excerpt: prev.excerpt || BlogService.generateExcerpt(value as string),
       }));
     }
   };
@@ -128,16 +141,18 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ slug, onSave }) => {
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-slate-200">
-        {(['editor', 'seo', 'preview'] as const).map((tab) => (
+        {(['editor', 'seo', 'social', 'preview'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 font-medium border-b-2 transition ${
+            className={`px-4 py-2 font-medium border-b-2 transition flex items-center gap-2 ${
               activeTab === tab
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
+            {tab === 'social' && <Share2 className="w-4 h-4" />}
+            {tab === 'seo' && <Activity className="w-4 h-4" />}
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
         ))}
@@ -217,9 +232,22 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ slug, onSave }) => {
 
           {/* Content */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Content * ({formData.wordCount} words, {formData.readingTime} min read)
-            </label>
+            <div className="flex justify-between items-end mb-1">
+              <label className="block text-sm font-medium text-slate-700">
+                Content *
+              </label>
+              {analysis && (
+                <div className="flex gap-4 text-xs">
+                  <span className={analysis.wordCount > 300 ? 'text-green-600' : 'text-amber-600'}>
+                    {analysis.wordCount} words
+                  </span>
+                  <span className="text-slate-500">{analysis.readingTime} min read</span>
+                  <span className={analysis.fleschKincaid >= 60 ? 'text-green-600' : 'text-amber-600'}>
+                    Reading Ease: {analysis.fleschKincaid}
+                  </span>
+                </div>
+              )}
+            </div>
             <textarea
               value={formData.content}
               onChange={(e) => handleFieldChange('content', e.target.value)}
@@ -386,8 +414,26 @@ export const BlogEditor: React.FC<BlogEditorProps> = ({ slug, onSave }) => {
             onClick={handleValidate}
             className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            Validate SEO
+            Validate SEO via AI
           </button>
+        </div>
+      )}
+
+      {/* Social Tab */}
+      {activeTab === 'social' && (
+        <div className="space-y-6">
+          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+            <h3 className="font-semibold text-slate-800 mb-2">Social Sharing Preview</h3>
+            <p className="text-sm text-slate-600 mb-4">
+              See exactly how your post will look when shared on Google, Twitter, and Facebook.
+            </p>
+            <SocialPreview
+              title={formData.seoTitle || formData.title}
+              description={formData.seoDescription || formData.excerpt}
+              url={`https://${window.location.hostname}/${formData.slug}`}
+              siteName="My React App"
+            />
+          </div>
         </div>
       )}
 

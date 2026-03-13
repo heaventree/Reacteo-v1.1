@@ -2,9 +2,16 @@ import React from 'react';
 import { AlertCircle, CheckCircle2, AlertTriangle, TrendingUp } from 'lucide-react';
 import type { AuditResult } from '../lib/ai/types';
 
+interface Suggestion {
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  estimatedImpact?: string;
+}
+
 interface SEOAuditReportProps {
   result: AuditResult;
-  onSuggestionsClick?: (suggestions: any[]) => void;
+  onSuggestionsClick?: (suggestions: Suggestion[]) => void;
 }
 
 export const SEOAuditReport: React.FC<SEOAuditReportProps> = ({

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlayCircle, AlertCircle, CheckCircle2, Search, FileText, Image as ImageIcon, Bot, Filter } from 'lucide-react';
+import { PlayCircle, AlertCircle, CheckCircle2, Search, Image as ImageIcon, Bot, Filter } from 'lucide-react';
 
 export interface SeoPageRecord {
   id: string;
@@ -25,8 +25,6 @@ interface BulkOperationsViewProps {
 export const BulkOperationsView: React.FC<BulkOperationsViewProps> = ({
   pages,
   totalCount,
-  currentPage,
-  onPageChange,
   onRunAudit,
   onRunAiGeneration
 }) => {

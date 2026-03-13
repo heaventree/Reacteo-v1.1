@@ -45,7 +45,7 @@ serve(async (req) => {
 
       // 2. Find matching template based on route
       // Very naive routing check for demo purposes
-      let template = templates?.find(t => page.path.startsWith(t.route_pattern.replace('/*', '')));
+      const template = templates?.find(t => page.path.startsWith(t.route_pattern.replace('/*', '')));
       
       if (!template) continue;
 

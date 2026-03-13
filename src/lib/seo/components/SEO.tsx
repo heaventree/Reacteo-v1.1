@@ -77,7 +77,7 @@ export const SEO: React.FC<SEOProps> = ({
   }, [openGraph, baseContext]);
 
   const ogImage = useMemo(() => {
-    let image = parsedOpenGraph?.image || config.defaultOGImage;
+    const image = parsedOpenGraph?.image || config.defaultOGImage;
     if (typeof image === 'string') {
       return image;
     }

@@ -30,7 +30,7 @@ export interface TwitterCardProps {
 export interface SchemaOrg {
   '@context'?: string;
   '@type': string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface SEOProps {
@@ -43,7 +43,7 @@ export interface SEOProps {
   jsonLd?: SchemaOrg | SchemaOrg[];
   noindex?: boolean;
   nofollow?: boolean;
-  templateContext?: Record<string, any>;
+  templateContext?: Record<string, unknown>;
 }
 
 export interface RouteMetadata {
@@ -76,7 +76,7 @@ export interface SEOConfig {
 }
 
 export interface PreloadedState {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ImageProps

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Key, Globe, Layout, CheckCircle } from 'lucide-react';
+import { Save, Key, Globe } from 'lucide-react';
 
 export interface GlobalSettings {
   site_name: string;
