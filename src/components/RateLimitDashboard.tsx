@@ -2,15 +2,6 @@ import React from "react";
 import { Zap, Clock, TrendingUp, AlertCircle } from "lucide-react";
 import { useRateLimits } from "../lib/ai/useRateLimits";
 
-interface RateLimitStatus {
-  endpoint: string;
-  tokensRemaining: number;
-  maxTokens: number;
-  refillRate: number;
-  lastRefill: string;
-  nextRefillIn: number;
-}
-
 export const RateLimitDashboard: React.FC = () => {
   const { status, loading, error, refresh } = useRateLimits();
 
