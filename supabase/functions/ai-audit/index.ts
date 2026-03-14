@@ -72,7 +72,7 @@ Deno.serve(async (req: Request) => {
     const method = req.method;
 
     if (method === "GET") {
-      // Get audits for a page
+      // Get audits for a page (no rate limit for reads)
       const pageId = url.searchParams.get("pageId");
 
       let query = supabase.from("ai_audits").select("*").order("timestamp", {
@@ -93,6 +93,40 @@ Deno.serve(async (req: Request) => {
     }
 
     if (method === "POST") {
+      // Rate limiting check for audit creation
+      const { data: rateLimitResult, error: rateLimitError } = await supabase.rpc(
+        "check_rate_limit",
+        {
+          p_user_id: user.id,
+          p_endpoint: "ai-audit",
+          p_max_tokens: 100,
+          p_refill_rate: 10,
+          p_tokens_to_consume: 1,
+        }
+      );
+
+      if (rateLimitError) {
+        console.error("Rate limit check error:", rateLimitError);
+      }
+
+      if (rateLimitResult && !rateLimitResult.allowed) {
+        return new Response(
+          JSON.stringify({
+            error: "Rate limit exceeded",
+            retryAfter: rateLimitResult.retry_after,
+            tokensRemaining: rateLimitResult.tokens_remaining,
+          }),
+          {
+            status: 429,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json",
+              "Retry-After": String(rateLimitResult.retry_after),
+            },
+          }
+        );
+      }
+
       // Create new audit
       const body: AuditRequest = await req.json();
 

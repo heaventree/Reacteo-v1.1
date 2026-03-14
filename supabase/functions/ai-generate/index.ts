@@ -50,6 +50,45 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Rate limiting check
+    const serviceClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const { data: rateLimitResult, error: rateLimitError } = await serviceClient.rpc(
+      "check_rate_limit",
+      {
+        p_user_id: user.id,
+        p_endpoint: "ai-generate",
+        p_max_tokens: 100,
+        p_refill_rate: 10,
+        p_tokens_to_consume: 1,
+      }
+    );
+
+    if (rateLimitError) {
+      console.error("Rate limit check error:", rateLimitError);
+    }
+
+    if (rateLimitResult && !rateLimitResult.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: "Rate limit exceeded",
+          retryAfter: rateLimitResult.retry_after,
+          tokensRemaining: rateLimitResult.tokens_remaining,
+        }),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": String(rateLimitResult.retry_after),
+          },
+        }
+      );
+    }
+
     const body: AIRequest = await req.json();
 
     // Get API key from environment based on provider

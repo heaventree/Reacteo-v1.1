@@ -7,6 +7,22 @@ import type { AIResponse, AIRequest, AuditResult, PageContent, AIModel } from '.
 
 const API_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
 
+/**
+ * Custom error for rate limit exceeded responses
+ */
+export class RateLimitError extends Error {
+  retryAfter: number;
+  tokensRemaining: number;
+
+  constructor(retryAfter: number, tokensRemaining: number) {
+    const minutes = Math.ceil(retryAfter / 60);
+    super(`Rate limit exceeded. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`);
+    this.name = 'RateLimitError';
+    this.retryAfter = retryAfter;
+    this.tokensRemaining = tokensRemaining;
+  }
+}
+
 export class AIService {
   private model: AIModel | null = null;
 
@@ -64,6 +80,15 @@ export class AIService {
         ...request,
       }),
     });
+
+    // Handle rate limiting
+    if (response.status === 429) {
+      const errorData = await response.json();
+      throw new RateLimitError(
+        errorData.retryAfter || 60,
+        errorData.tokensRemaining || 0
+      );
+    }
 
     if (!response.ok) {
       const error = await response.json();
