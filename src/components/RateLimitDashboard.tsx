@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Zap, Clock, TrendingUp, AlertCircle } from "lucide-react";
+import { useRateLimits } from "../lib/ai/useRateLimits";
 
 interface RateLimitStatus {
   endpoint: string;
@@ -11,49 +12,7 @@ interface RateLimitStatus {
 }
 
 export const RateLimitDashboard: React.FC = () => {
-  const [status, setStatus] = useState<RateLimitStatus[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchRateLimitStatus = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // TODO: Replace with actual Supabase query
-      // This will query the user_rate_limits table
-      const mockData: RateLimitStatus[] = [
-        {
-          endpoint: "ai-generate",
-          tokensRemaining: 75,
-          maxTokens: 100,
-          refillRate: 10,
-          lastRefill: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
-          nextRefillIn: 58,
-        },
-        {
-          endpoint: "ai-audit",
-          tokensRemaining: 42,
-          maxTokens: 100,
-          refillRate: 10,
-          lastRefill: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-          nextRefillIn: 55,
-        },
-      ];
-
-      setStatus(mockData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch rate limit status");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchRateLimitStatus();
-    const interval = setInterval(fetchRateLimitStatus, 30000); // Refresh every 30s
-    return () => clearInterval(interval);
-  }, []);
+  const { status, loading, error, refresh } = useRateLimits();
 
   const getStatusColor = (remaining: number, max: number): string => {
     const percentage = (remaining / max) * 100;
@@ -110,7 +69,7 @@ export const RateLimitDashboard: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={fetchRateLimitStatus}
+          onClick={refresh}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
         >
           Refresh
