@@ -3,6 +3,7 @@ import { buildWebSiteSchema } from './lib/seo';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { AuthGuard } from './components/AuthGuard';
+import { RateLimitDashboard } from './components/RateLimitDashboard';
 
 function HomePage() {
   return (
@@ -27,6 +28,9 @@ function HomePage() {
           <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <Link to="/" className="text-2xl font-bold text-slate-900">My Awesome App</Link>
             <div className="flex gap-4">
+              <Link to="/rate-limits" className="text-slate-600 hover:text-slate-900 transition">
+                Rate Limits
+              </Link>
               <Link to="/admin" className="text-slate-600 hover:text-slate-900 transition">
                 Admin Dashboard
               </Link>
@@ -128,6 +132,14 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route
+          path="/rate-limits"
+          element={
+            <AuthGuard requiredRole="authenticated">
+              <RateLimitDashboard />
+            </AuthGuard>
+          }
+        />
         <Route
           path="/admin"
           element={
